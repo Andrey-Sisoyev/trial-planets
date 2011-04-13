@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+<suite name="(Test suite name here)">
+  <test name="(Test name here)">
+    <classes>
+       <!-- class name="home.pwa.model.facade.ModelFacadeTest" /-->
+    </classes>
+  </test>
+</suite>

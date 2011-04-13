@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+        >
+
+<head>
+    <title>Planets v2.0 - solution using JSF Facelets</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js" type="text/javascript"></script>
+    <!-- script src="/resources/app.js" type="text/javascript"></script>
+    <script src="/resources/crud.js" type="text/javascript"></script>
+    <script src="/resources/planets.js" type="text/javascript"></script -->
+    <script src="/resources/table.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/resources/planets.css" type="text/css"/>
+</head>
+
+<body>
+    <img src="/resources/smil.gif" alt=""/>
+    <!--@elvariable id="managedPlanets" type="home.tries.planets.web.solution_jsf.mbeans.ManagedPlanets"-->
+    <!--  order table -->
+
+        <h:panelGroup id="pan_planets_table">
+            <a4j:status id="table_status" for="reg_planets_table">
+                <f:facet name="start">
+                    <h:graphicImage  value="/resources/loading_anim.gif" width="50px"/>
+                </f:facet>
+            </a4j:status>
+            <a4j:region id="reg_planets_table">
+                <a4j:commandButton id="reload_btn" value="Reload"  actionListener="#{managedPlanets.reloadTable()}" />
+                <h:outputText value="Last time updated: #{managedPlanets.snapshotTime}"/>
+                <h:panelGroup id="pan_planets_table_inner" rendered="#{managedPlanets.planetsCount > 0}">
+                    <h:outputText value="Planets count: #{managedPlanets.planetsCount}"/>
+                    <script type="text/javascript">
+                        var cur_selection_holder = null;    // declared by the table
+                        var cur_selection_candidate = null; // declared by the table
+                    </script>
+                    <rich:dataTable value="#{managedPlanets.planets}" var="planet"
+                            rowKeyVar="row" binding="#{managedPlanets.table}"
+                            onmouseover="highlightRow_(this, 'transparent', '#F8F8F8');"
+                            onmouseout="uNhighlightRow_(this, '#{a4jSkin.tableBackgroundColor}');"
+                            onmousedown="selectRow_(this, '#{a4jSkin.tableBackgroundColor}', '#95F0D4', '#CDF095');"
+                            >
+                        <rich:column>
+                            <f:facet name="header">Planet name:</f:facet>
+                            <h:outputText value="#{planet.name}" />
+                        </rich:column>
+                        <rich:column>
+                            <f:facet name="header">Distance to earth</f:facet>
+                            <h:outputText value="#{planet.distToEarth}" />
+                        </rich:column>
+                        <rich:column>
+                            <f:facet name="header">Diameter</f:facet>
+                            <h:outputText value="#{planet.diameter}" />
+                        </rich:column>
+                        <rich:column>
+                            <f:facet name="header">Discoverer</f:facet>
+                            <h:outputText value="#{planet.discovererName}" />
+                        </rich:column>
+                        <rich:column>
+                            <f:facet name="header">Has atmosphere</f:facet>
+                            <h:outputText value="#{planet.atmosphere}"/>
+                        </rich:column>
+                        <rich:column>
+                            <f:facet name="header">Operate</f:facet>
+                            <h:form>
+                                <h:inputHidden binding="#{managedPlanets.operatedPlanetId}" value="#{planet.plID}"/>
+                                <a4j:commandButton value="Info"   action="#{managedPlanets.showForm_READ()}"   reRender="reg_CRUD_window"/>
+                                <a4j:commandButton value="Update" action="#{managedPlanets.showForm_UPDATE()}" reRender="reg_CRUD_window"/>
+                                <a4j:commandButton value="Delete" action="#{managedPlanets.showForm_DELETE()}" reRender="reg_CRUD_window"/>
+                            </h:form>
+                        </rich:column>
+                    </rich:dataTable>
+                </h:panelGroup>
+                <h:outputText rendered="#{managedPlanets.planetsCount <= 0}" value="Planets table is empty."/>
+            </a4j:region>
+        </h:panelGroup>
+
+    <a4j:commandButton value="New" action="#{managedPlanets.showForm_CREATE()}" />
+
+    <a4j:region id="reg_CRUD_window" >
+        <h:inputHidden id="do_reload_table" value="#{not managedPlanets.CRUD_window.rendered}" />
+        <!--  modal panel where the wizard is running -->
+        <rich:modalPanel id="CRUD_window" width="550" height="300" binding="#{managedPlanets.CRUD_window}" rendered="false">
+            <f:facet name="header">Planet form</f:facet>
+            <f:facet name="controls">
+                <a href="list_crud.xhtml#" onclick="#{rich:component('CRUD_window')}.hide()">X</a>
+            </f:facet>
+
+            <h:panelGroup id="wizardInclude">
+                <a4j:form>
+                    <a4j:queue/>
+
+                    <h:outputLabel for="pl_id" value="Planet ID: "  />
+                    <h:inputText  id="pl_id" readonly="true" validatorMessage="Invalid planet ID!" value="#{empty managedPlanets.planetCommand.planet.plID ? '&lt;unidentified&gt;' : managedPlanets.planetCommand.planet.plID}"/>
+
+                    <h:outputLabel for="name" value="Planet name: "  />
+                    <h:inputText id="name" validatorMessage="Invalid planet name!" value="#{managedPlanets.planetCommand.planet.name}"/>
+
+                    <h:outputLabel for="distToEarth" value="Distance to Earth: "  />
+                    <h:inputText id="distToEarth" validatorMessage="Invalid distance to Earth!" value="#{managedPlanets.planetCommand.planet.distToEarth}"/>
+
+                    <h:outputLabel for="diameter" value="Planet diameter: "  />
+                    <h:inputText id="diameter" validatorMessage="Invalid planet diameter!" value="#{managedPlanets.planetCommand.planet.diameter}"/>
+
+                    <h:outputLabel for="discoverer" value="Discoverer name: "  />
+                    <h:inputText id="discoverer" validatorMessage="Invalid discoverer name!" value="#{managedPlanets.planetCommand.planet.discovererName}"/>
+
+                    <h:outputLabel for="discoverer" value="Has atmosphere: "  />
+                    <h:selectBooleanCheckbox id="discoverer" validatorMessage="Invalid data about atmosphere!" value="#{managedPlanets.planetCommand.planet.atmosphere}"/>
+
+                    <a4j:commandButton value="#{managedPlanets.planetCommand.operation}" action="#{managedPlanets.doCRUD}" status="commonstatus" reRender="reg_CRUD_window" oncomplete="if(document.getElementById('do_reload_table').value == 'false') document.getElementById('reload_btn').click();"/>
+                    <a4j:commandButton value="Cancel" actionListener="#{managedPlanets.cancelAction}" status="commonstatus" reRender="reg_CRUD_window"/>
+
+                    <a4j:status for="reg_CRUD_window">
+                        <f:facet name="start">
+                            <h:graphicImage  value="/resources/loading_anim.gif" width="50px"/>
+                        </f:facet>
+                    </a4j:status>
+                </a4j:form>
+                <a4j:outputPanel ajaxRendered="true">
+                    <h:messages errorStyle="color:red;font-weight:bold;" binding=""/>
+                </a4j:outputPanel>
+            </h:panelGroup>
+        </rich:modalPanel>
+    </a4j:region>
+
+
+
+
+</body>
+
+</html>
