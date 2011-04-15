@@ -78,12 +78,12 @@
             <h:commandButton value="Reload">
                 <a4j:support reRender="frm_planetsTable,planetCommandStatus"
                             action="#{managedPlanets.reloadTable()}"
-                            event="onclick"/>
+                            event="onclick" disableDefault="true"/>
             </h:commandButton>
             <h:commandButton value="New">
                 <a4j:support reRender="reg_CRUD_window,planetCommandStatus"
                             action="#{managedPlanets.showNew()}"
-                            event="onclick"/>
+                            event="onclick" disableDefault="true"/>
             </h:commandButton>
             <!-- a4j:commandButton value="New2" id="new_planet_btn2" action="#{managedPlanets.showNew()}"/ -->
         </h:form>

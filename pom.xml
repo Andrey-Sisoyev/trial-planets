@@ -8,12 +8,13 @@
 	<packaging>war</packaging>
 	<description>An sample RichFaces application.</description>
 	<url>http://jboss.org/richfaces</url>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javaVersion>1.6</javaVersion>
-	</properties>
-	
+        <path.JBoss>${env.JBOSS_HOME}</path.JBoss>
+    </properties>
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
@@ -29,6 +30,43 @@
         </resources>
 
 		<plugins>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <version>1.0.6</version>
+                <configuration>
+                    <container>
+                        <containerId>jboss6x</containerId>
+                        <home>${path.JBoss}</home>                        <log>${project.build.directory}/logs/jboss6x.log</log>
+                        <output>${project.build.directory}/logs/jboss6x.out</output>
+                        <timeout>300000</timeout><!-- 5 minutes -->
+                        <append>true</append>
+                    </container>
+                    <configuration>
+                        <type>existing</type>
+                        <home>${path.JBoss}/server/default</home>
+                        <properties>
+                            <cargo.servlet.port>8080</cargo.servlet.port>
+                            <cargo.jboss.configuration>default</cargo.jboss.configuration>
+                            <cargo.rmi.port>8083</cargo.rmi.port>
+                            <cargo.logging>high</cargo.logging>
+                        </properties>
+                        <deployables>
+                            <!-- application to deploy -->
+                            <deployable>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <type>war</type>
+                                <properties>
+                                  <context>${project.artifactId}</context>
+                                </properties>
+                            </deployable>
+                        </deployables>
+                    </configuration>
+                </configuration>
+            </plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -40,7 +78,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<repositories>
 		<repository>
 			<id>jboss</id>
@@ -51,7 +89,7 @@
             <url>http://download.java.net/maven/2</url>
         </repository>
 	</repositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.testng</groupId>
