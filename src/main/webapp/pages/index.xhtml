@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich">
+<ui:composition template="/templates/template.xhtml">
+
+	<ui:define name="title">#{msgs.applicationName}</ui:define>
+	<ui:define name="body">
+        <h:inputText value="Page reload tester"/>
+        <rich:panel style="border:0;width:560px;text-align:center">
+            <f:facet name="header">
+                <h:outputText value="Planets list" />
+            </f:facet>
+
+            <a4j:outputPanel id="frm_planetsTable">
+                <h:form id="frm_planetsTable_">
+                    <rich:extendedDataTable
+                            id="planetsTable"
+                            value="#{managedPlanets.planetsDataModel}"
+                            var="planet" rowKeyVar="rkvar"
+                            width="550px" height="300px"
+                            selectedClass="dataTableSelectedRow" sortMode="single" selectionMode="single"
+                            selection="#{managedPlanets.selection}"
+                            rendered="#{not empty managedPlanets.planetsList}"
+                            tableState="#{managedPlanets.tableState}"
+                            > <!-- todo -->
+                        <a4j:support reRender="planetCommandStatus,reg_CRUD_window" id="planetsTable"
+                            action="#{managedPlanets.takeSelection()}"
+                            event="onselectionchange" />
+                        <rich:column id="name" headerClass="dataTableHeader" width="150" label="Name" sortable="true"
+                                     sortBy="#{planet.name}" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon"
+                                     filterBy="#{planet.name}" filterEvent="onkeyup">
+                            <f:facet name="header">
+                                <h:outputText value="Name" />
+                            </f:facet>
+                            <h:outputText value="#{planet.name}" />
+                        </rich:column>
+                        <rich:column id="diameter" width="100" headerClass="dataTableHeader" label="Diameter" sortable="true"
+                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                             <f:facet name="header">
+                                <h:outputText value="Diameter" />
+                             </f:facet>
+                             <h:outputText value="#{planet.diameter}" />
+                        </rich:column>
+                        <rich:column id="distToEarth" width="100" headerClass="dataTableHeader" label="Distance to Earth"
+                                     sortable="true" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                             <f:facet name="header">
+                                <h:outputText value="Distance to Earth" />
+                             </f:facet>
+                             <h:outputText value="#{planet.distToEarth}">
+                             </h:outputText>
+                        </rich:column>
+                        <rich:column id="discovererName" width="100" headerClass="dataTableHeader" label="Discoverer name" sortable="true"
+                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                             <f:facet name="header">
+                                <h:outputText value="Discoverer name" />
+                             </f:facet>
+                             <h:outputText value="#{planet.discovererName}" />
+                        </rich:column>
+                        <rich:column id="atmosphere" width="100" headerClass="dataTableHeader" label="Has atmosphere" sortable="true"
+                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                             <f:facet name="header">
+                                <h:outputText value="Has atmosphere" />
+                             </f:facet>
+                             <h:selectBooleanCheckbox value="#{planet.atmosphere}" disabled="true"/>
+                        </rich:column>
+                    </rich:extendedDataTable>
+                </h:form>
+                <h:outputText value="No entries in the table." rendered="#{empty managedPlanets.planetsList}"/>
+            </a4j:outputPanel>
+        </rich:panel>
+        <h:form id="planets_new_btn_frm">
+            <h:commandButton value="Reload">
+                <a4j:support reRender="frm_planetsTable,planetCommandStatus"
+                            action="#{managedPlanets.reloadTable()}"
+                            event="onclick"/>
+            </h:commandButton>
+            <h:commandButton value="New">
+                <a4j:support reRender="reg_CRUD_window,planetCommandStatus"
+                            action="#{managedPlanets.showNew()}"
+                            event="onclick"/>
+            </h:commandButton>
+            <!-- a4j:commandButton value="New2" id="new_planet_btn2" action="#{managedPlanets.showNew()}"/ -->
+        </h:form>
+
+        <a4j:outputPanel  id="reg_CRUD_window" >
+            <!--  modal panel where the wizard is running -->
+            <rich:panel id="CRUD_window" rendered="#{managedPlanets.planetCommand.doingOperation}">
+                <f:facet name="header">
+                    Planet CRUD form {OPERATION: #{managedPlanets.planetCommand.operation.string}; READ-ONLY: #{managedPlanets.planetCommand.operation.areFieldsReadOnly}}
+                </f:facet>
+                <h:panelGroup id="wizardInclude">
+                    <a4j:form>
+                        <a4j:queue/>
+
+                        <h:outputLabel for="pl_id" value="Planet ID: "  />
+                        <h:inputText  id="pl_id" readonly="true" validatorMessage="Invalid planet ID!"
+                                      value="#{managedPlanets.planetCommand.selectedPlanet.plID}"/>
+
+                        <h:outputLabel for="name" value="Planet name: "  />
+                        <h:inputText id="name" validatorMessage="Invalid planet name!"
+                                     value="#{managedPlanets.planetCommand.selectedPlanet.name}"
+                                     readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+
+                        <h:outputLabel for="distToEarth" value="Distance to Earth: "  />
+                        <h:inputText id="distToEarth" validatorMessage="Invalid distance to Earth!"
+                                     value="#{managedPlanets.planetCommand.selectedPlanet.distToEarth}"
+                                     readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+
+                        <h:outputLabel for="diameter" value="Planet diameter: "  />
+                        <h:inputText id="diameter" validatorMessage="Invalid planet diameter!"
+                                     value="#{managedPlanets.planetCommand.selectedPlanet.diameter}"
+                                     readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+
+                        <h:outputLabel for="discoverer" value="Discoverer name: "  />
+                        <h:inputText id="discoverer" validatorMessage="Invalid discoverer name!"
+                                     value="#{managedPlanets.planetCommand.selectedPlanet.discovererName}"
+                                     readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+
+                        <h:outputLabel for="atmosphere" value="Has atmosphere: "  />
+                        <h:selectBooleanCheckbox id="atmosphere" validatorMessage="Invalid data about atmosphere!"
+                                                 value="#{managedPlanets.planetCommand.selectedPlanet.atmosphere}"
+                                                 readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+
+                        <rich:panel rendered="#{not managedPlanets.planetCommand.operation.read}">
+                            <a4j:commandButton value="#{managedPlanets.planetCommand.operation}"
+                                               action="#{managedPlanets.doCRUD()}"
+                                               reRender="reg_CRUD_window,planetsTable,planetCommandStatus"/>
+                            <a4j:commandButton value="Cancel"
+                                               action="#{managedPlanets.cancelAction()}"
+                                               reRender="reg_CRUD_window,planetCommandStatus"/>
+                        </rich:panel>
+                        <rich:panel rendered="#{managedPlanets.planetCommand.operation.read}">
+                            <a4j:commandButton value="Prepare to Update"
+                                               action="#{managedPlanets.prepareUpdate()}"
+                                               reRender="reg_CRUD_window,planetCommandStatus"/>
+                            <a4j:commandButton value="Prepare to Delete"
+                                               action="#{managedPlanets.prepareDelete()}"
+                                               reRender="reg_CRUD_window,planetCommandStatus"/>
+                        </rich:panel>
+                    </a4j:form>
+                    <a4j:outputPanel ajaxRendered="true">
+                        <h:messages errorStyle="color:red;font-weight:bold;"/>
+                    </a4j:outputPanel>
+                </h:panelGroup>
+            </rich:panel>
+        </a4j:outputPanel>
+        <rich:panel id="planetCommandStatus" style="border:0;width:60%;text-align:center" rendered="false">
+            read: #{not managedPlanets.planetCommand.operation.read} <br/>
+            planetCommand : #{managedPlanets.planetCommand}<br/>
+            planetCommand.doingOperation : #{managedPlanets.planetCommand.doingOperation}<br/>
+            planetCommand.operation :      #{managedPlanets.planetCommand.operation}<br/>
+            planetCommand.selectedPlanet : #{managedPlanets.planetCommand.selectedPlanet}<br/>
+            planetsList : #{managedPlanets.planetsList}<br/>
+            rendered : <h:outputText value=" IS RENDERED" rendered="#{managedPlanets.planetCommand.doingOperation}"/><br/>
+            rendered :
+            <rich:panel rendered="#{managedPlanets.planetCommand.doingOperation}">
+                #{managedPlanets.planetsList}
+            </rich:panel>
+        </rich:panel>
+        <!-- a4j:log level="ALL" popup="false" width="400" height="200"/ -->
+    </ui:define>
+
+</ui:composition>
+
+</html>
