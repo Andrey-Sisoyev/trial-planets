@@ -35,6 +35,10 @@
         <param-name>com.sun.faces.expressionFactory</param-name>
         <param-value>com.sun.el.ExpressionFactoryImpl</param-value>
     </context-param>
+    <context-param>  <!-- PostConstruct, PreDestroy annotations -->
+          <param-name>com.sun.faces.injectionProvider</param-name>
+          <param-value>org.jboss.web.jsf.integration.injection.JBossInjectionProvider</param-value>
+     </context-param>
 
 	<filter>
 		<display-name>RichFaces Filter</display-name>

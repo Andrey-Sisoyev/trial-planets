@@ -1,4 +1,5 @@
-.error {color: red; font-weight:bold;}
+.errorMsg {color: red; font-weight:bold;}
+.infoMsg {color: green; font-weight:bold;}
 tr.tab_header{background-color: #BDDCF0}
 p.tab_header{font-weight:bold; color: blue}
 td.cell_not_last{border-right-style:solid;}

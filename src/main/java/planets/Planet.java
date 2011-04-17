@@ -1,10 +1,13 @@
 package planets;
 
+import home.lang.CloneableFixed;
+import home.lang.RTCloneNotSupported;
+
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class Planet implements java.io.Serializable {
+public class Planet implements java.io.Serializable, CloneableFixed {
     public static final ConcurrentMap<Integer, Planet> planetsDB = new ConcurrentHashMap<Integer, Planet>();
     public static volatile Integer planetsIDs_seq = 2;
     public static Integer planetsIDs_seq_next() {
@@ -87,6 +90,11 @@ public class Planet implements java.io.Serializable {
 
     public void setAtmosphere(boolean _atmosphere) {
         atmosphere = _atmosphere;
+    }
+
+    @Override
+    public Planet clone() {
+        try { return (Planet) super.clone(); } catch (CloneNotSupportedException e) { throw new RTCloneNotSupported(e); }
     }
 
     @Override

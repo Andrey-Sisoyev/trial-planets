@@ -1,4 +1,4 @@
-package planets;
+package home.lang;
 
 public enum CRUD_Op {
     CREATE, READ, UPDATE, DELETE;
