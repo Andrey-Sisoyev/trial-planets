@@ -5,15 +5,12 @@ import home.lang.EntityExistsException;
 import home.lang.EntityExistsNotException;
 import org.richfaces.model.DataProvider;
 import org.richfaces.model.ExtendedTableDataModel;
-import org.richfaces.model.selection.Selection;
 import org.richfaces.model.selection.SimpleSelection;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -23,7 +20,7 @@ public class ManagedPlanets implements java.io.Serializable {
 
     // ====================================
     // NON-STATIC STUFF
-    private volatile Locale currentLocale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+    private volatile String currentLocaleStr = FacesContext.getCurrentInstance().getViewRoot().getLocale().toString();
     private final PlanetCommand planetCommand;
     private volatile SimpleSelection selection; // final n/a
     private Date snapshotTime;
@@ -62,12 +59,12 @@ public class ManagedPlanets implements java.io.Serializable {
     // ====================================
     // GETTERS/SETTERS
 
-    public Locale getCurrentLocale() {
-        return currentLocale;
+    public String getCurrentLocaleStr() {
+        return currentLocaleStr;
     }
 
-    public void setCurrentLocale(Locale _currentLocale) {
-        currentLocale = _currentLocale;
+    public void setCurrentLocaleStr(String _currentLocaleStr) {
+        currentLocaleStr = _currentLocaleStr;
     }
 
     public PlanetCommand getPlanetCommand() {
@@ -284,7 +281,11 @@ public class ManagedPlanets implements java.io.Serializable {
     }
 
     public Object changeLocale() {
-        FacesContext.getCurrentInstance().getViewRoot().setLocale(this.currentLocale);
+        logger.info("before changeLocale " + FacesContext.getCurrentInstance().getViewRoot().getLocale());
+
+        FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(this.currentLocaleStr));
+
+        logger.info("after changeLocale " + FacesContext.getCurrentInstance().getViewRoot().getLocale());
         return null;
     }
 }

@@ -13,22 +13,24 @@
 
         <a4j:loadBundle basename="planets.messages" var="plMsgs"/>
 
-        <a4j:queue id="locale_changer_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+        <a4j:queue name="locale_changer_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+        <a4j:queue name=         "table_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+        <a4j:queue name=       "CRUD_op_queue" size="1" sizeExceededBehavior="fireNew" requestDelay="500"/>
 
-        <h:form>
-            <h:selectOneMenu value="#{managedPlanets.currentLocale}" >
-                <f:selectItems value="#{managedPlanets.applicationResourceBundle.supportedLocales}"/>
-                <a4j:support reRender="planetsTable_window,CRUD_window,messages_window"
-                             action="#{managedPlanets.changeLocale()}"
-                             event="onchange" eventsQueue="locale_changer_queue"/>
-            </h:selectOneMenu><i>(пока не работает)</i>
-        </h:form>
-
-        <a4j:queue id="table_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+        <a4j:region>
+            <h:form>
+                <h:selectOneMenu value="#{managedPlanets.currentLocaleStr}" >
+                    <f:selectItems value="#{managedPlanets.applicationResourceBundle.supportedLocales}"/>
+                    <a4j:support reRender="planetCommandStatus,planetsTable_window,CRUD_window,messages_window"
+                                 action="#{managedPlanets.changeLocale}"
+                                 event="onchange" eventsQueue="locale_changer_queue"/>
+                </h:selectOneMenu>
+            </h:form>
+        </a4j:region>
 
         <a4j:region>
               <h:form>
-                  <a4j:poll id="poll" interval="10000"
+                  <a4j:poll id="poll" interval="15000"
                             action="#{managedPlanets.reloadTable()}"
                             reRender="planetsTable,planetsTable_reload_info"
                             eventsQueue="table_queue"/>
@@ -115,8 +117,6 @@
                 <h:outputText value="No entries in the table." rendered="#{empty managedPlanets.planetsList}"/>
             </a4j:outputPanel>
         </rich:panel>
-
-        <a4j:queue id="CRUD_op_queue" size="1" sizeExceededBehavior="fireNew" requestDelay="500"/>
 
         <a4j:outputPanel id="CRUD_window" >
             <rich:panel style="border:0;width:600px">
@@ -205,6 +205,8 @@
                                                    reRender="CRUD_window,planetCommandStatus"
                                                    status="crud_status"/>
                             </h:panelGroup>
+
+                            <!-- todo: make tolerant to concurrent session-scope operations -->
                             <h:panelGroup style="border:0;padding:0;margin:0">
                                 <h:panelGroup rendered="#{managedPlanets.planetCommand.operation.read}" style="border:0">
                                     <a4j:commandButton value="#{managedPlanets.applicationResourceBundle.getPrepareOperation('UPDATE')}"

@@ -7,8 +7,10 @@ import javax.faces.context.FacesContext;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class ApplicationResourceBundle {
+    private static final Logger logger = Logger.getLogger(ManagedPlanets.class.getSimpleName());
     private static final String FILE_ID = "app.messages";
     private static final List<Locale> SUPPORTED_LOCALES = // todo: make sure loads after FacesContext (how???)
             Collections.unmodifiableList(
@@ -50,7 +52,9 @@ public class ApplicationResourceBundle {
     private static final String MKEY__DATETIME_FORMAT = "ui.dateTimePattern";
     public static String getDatetimeStr(Date datetime) {
         ResourceBundle rb = getBundle();
-        SimpleDateFormat mf = new SimpleDateFormat(rb.getString(MKEY__DATETIME_FORMAT)); // todo: put in static map
+        String date_time_format = rb.getString(MKEY__DATETIME_FORMAT);
+        // logger.info("getDatetimeStr (" + date_time_format + ", " + datetime + ")");
+        SimpleDateFormat mf = new SimpleDateFormat(date_time_format); // todo: put in static map
         return mf.format(datetime);
     }
 
