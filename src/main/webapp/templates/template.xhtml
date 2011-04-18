@@ -7,20 +7,22 @@
 	xmlns:a4j="http://richfaces.org/a4j"
 	xmlns:rich="http://richfaces.org/rich">
 
-<a4j:loadBundle basename="planets.messages" var="msgs"/>
+<a4j:loadBundle basename="app.messages" var="appMsgs"/>
 
 <head>
 	<title><ui:insert name="title">Default title</ui:insert></title>
-	<meta http-equiv="Content-Type" content="text/xhtml; charset=utf-8" />
+	<meta http-equiv="Content-Type" content="text/xhtml; charset=UTF-8" />
 	<a4j:loadStyle src="resource:///resources/planets.css"/>
 	<style type="text/css">
-		html {
+html {
 	height: 100%;
 	background: #{richSkin.additionalBackgroundColor};
 	background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #{richSkin.generalBackgroundColor}), color-stop(0.3, #{richSkin.additionalBackgroundColor}), color-stop(1, rgb(255,255,255))) no-repeat;
 	background: -moz-linear-gradient(center bottom, #{richSkin.generalBackgroundColor} 0%, #{richSkin.additionalBackgroundColor} 50%, rgb(255, 255, 255) 100%);
 	background-attachment: fixed;
 }
+/* an ugly hack */
+span.extdt-sortable-header {background-position:right center;background-repeat:no-repeat;white-space:normal;}
 	</style>
 	<ui:insert name="head"/>
 </head>

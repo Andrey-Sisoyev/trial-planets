@@ -1,6 +1,8 @@
 package planets;
 
-
+import home.lang.CRUD_Op;
+import home.lang.EntityExistsException;
+import home.lang.EntityExistsNotException;
 import org.richfaces.model.DataProvider;
 import org.richfaces.model.ExtendedTableDataModel;
 import org.richfaces.model.selection.Selection;
@@ -10,6 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -19,10 +23,21 @@ public class ManagedPlanets implements java.io.Serializable {
 
     // ====================================
     // NON-STATIC STUFF
-    private final PlanetCommand planetCommand = new PlanetCommand(); // todo: volatile applicable??
-    private volatile SimpleSelection selection = new SimpleSelection(); // final n/a
+    private volatile Locale currentLocale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+    private final PlanetCommand planetCommand;
+    private volatile SimpleSelection selection; // final n/a
+    private Date snapshotTime;
     private volatile Object tableState; // todo: remove???
-    private final ExtendedTableDataModel<Planet> tableDataModel =
+    private final ExtendedTableDataModel<Planet> tableDataModel;
+
+    // ====================================
+    // CONSTRUCTORS
+
+    public ManagedPlanets() {
+        logger.info("constructor call");
+        planetCommand = new PlanetCommand();
+        selection = new SimpleSelection();
+        tableDataModel =
                 new ExtendedTableDataModel<Planet>(new DataProvider<Planet>(){
                     public Planet getItemByKey(Object key) {
                         for(Planet p : Planet.planetsDB.values())
@@ -35,12 +50,8 @@ public class ManagedPlanets implements java.io.Serializable {
                     public Object getKey(Planet item) { return item.getPlID(); }
                     public int getRowCount() { return Planet.planetsDB.size(); }
                 });
-
-    // ====================================
-    // CONSTRUCTORS
-
-    public ManagedPlanets() {
-        logger.info("constructor call");
+        tableDataModel.reset();
+        snapshotTime = new Date();
     }
 
     @PostConstruct
@@ -50,6 +61,14 @@ public class ManagedPlanets implements java.io.Serializable {
 
     // ====================================
     // GETTERS/SETTERS
+
+    public Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
+    public void setCurrentLocale(Locale _currentLocale) {
+        currentLocale = _currentLocale;
+    }
 
     public PlanetCommand getPlanetCommand() {
         return planetCommand;
@@ -80,6 +99,78 @@ public class ManagedPlanets implements java.io.Serializable {
     public ExtendedTableDataModel<Planet> getPlanetsDataModel() {  // src: http://anonsvn.jboss.org/repos/richfaces/branches/community/3.3.X/samples/richfaces-demo/src/main/java/org/richfaces/demo/extendedDataTable/ExtendedTableBean.java
         return tableDataModel;
     }
+
+    public String getSnapshotTime() {
+        return ApplicationResourceBundle.getDatetimeStr(snapshotTime);
+    }
+
+    public ApplicationResourceBundle getApplicationResourceBundle() {
+        return ApplicationResourceBundle.getInstance();
+    }
+
+    // ====================================
+    // METHODS
+    private void noticePerformance(String performed_what) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Performed '" + performed_what + "': Summary.", "Performed '" + performed_what + "': Details."));
+    }
+
+    private void delay() {
+        try { Thread.sleep(1000); } catch(InterruptedException e) { e.printStackTrace(); }
+    }
+
+    private String getLocalizedMsg(String bundle, String key) {
+        Locale loc = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+        ResourceBundle labels = ResourceBundle.getBundle(bundle, loc);
+        return labels.getString(key);
+
+    }
+
+    public void resetTableSnapshot() {
+        synchronized (tableDataModel) {
+            tableDataModel.reset();
+            snapshotTime = new Date();
+        }
+    }
+
+    public void notifyAboutCRUD_Error(CRUD_Op operation_log, Integer planet_id_log, Exception e) {
+        Locale loc = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+        ResourceBundle app_labels    = ResourceBundle.getBundle("app.messages", loc);
+        ResourceBundle planet_labels = ResourceBundle.getBundle("planets.messages", loc);
+
+        MessageFormat msgfmt_failure         = new MessageFormat(app_labels.getString("operation.failure"));
+        MessageFormat msgfmt_failure_details = new MessageFormat(app_labels.getString("operation.failure.details"));
+
+        String msg_operation = app_labels.getString(operation_log.getMsgPropertyName());
+        String msg_obj_type  = planet_labels.getString("planet");
+        String msg_id        = planet_id_log.toString();
+        String msg_details   = e.getLocalizedMessage(); // for bes case getLocalizedMessage is to by manually overriden
+        String msg_failure_details = msgfmt_failure_details.format(msg_details);
+
+        Object[] args = {msg_operation, msg_obj_type, msg_id, msg_failure_details};
+
+        String msg_failure = msgfmt_failure.format(args);
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg_failure, ""));
+    }
+
+    public void notifyAboutCRUD_Success(CRUD_Op operation_log, Integer planet_id_log) {
+        Locale loc = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+        ResourceBundle app_labels    = ResourceBundle.getBundle("app.messages", loc);
+        ResourceBundle planet_labels = ResourceBundle.getBundle("planets.messages", loc);
+
+        MessageFormat msgfmt_success = new MessageFormat(app_labels.getString("operation.success"));
+
+        String msg_operation = app_labels.getString(operation_log.getMsgPropertyName());
+        String msg_obj_type  = planet_labels.getString("planet");
+        String msg_id        = planet_id_log.toString();
+
+        Object[] args = {msg_operation, msg_obj_type, msg_id};
+
+        String msg_success = msgfmt_success.format(args);
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg_success, ""));
+    }
+
     // ====================================
     // ACTIONS
 
@@ -87,9 +178,8 @@ public class ManagedPlanets implements java.io.Serializable {
         logger.info("before reloadTable (" + this + ")");
         delay();
 
-        synchronized (tableDataModel) {
-            tableDataModel.reset();
-        }
+        resetTableSnapshot();
+
         logger.info("after reloadTable (" + this + ")");
         noticePerformance("reloadTable");
         return null;
@@ -152,15 +242,31 @@ public class ManagedPlanets implements java.io.Serializable {
         logger.info("before doCRUD  (" + this + ")");
         delay();
 
+        CRUD_Op operation_log;
+        Integer planet_id_log;
+        Exception failure_cause = null;
+
         synchronized (planetCommand) {
-            planetCommand.doCRUD();
-            synchronized (tableDataModel) {
-                tableDataModel.reset();
-            }
+            // critical section!
+            // operation of the command have no setter, and may be changed only through action
+            // all actions are assummed to be thread-safe
+            operation_log = planetCommand.getOperation();
+            planet_id_log = planetCommand.getSelectedPlanet().getPlID(); // getSelectedPlanet != null
+
+            try { planetCommand.doCRUD(); }
+            catch (EntityExistsNotException e) { failure_cause = e; }
+            catch (EntityExistsException    e) { failure_cause = e; }
+
+            if(planet_id_log == null) planet_id_log = planetCommand.getSelectedPlanet().getPlID();
+            assert planet_id_log != null;
+
+            resetTableSnapshot();
         }
+        if(failure_cause != null)
+             notifyAboutCRUD_Error  (operation_log, planet_id_log, failure_cause);
+        else notifyAboutCRUD_Success(operation_log, planet_id_log);
 
         logger.info("after doCRUD (" + this + ")");
-        noticePerformance("doCRUD");
         return null;
     }
 
@@ -177,11 +283,8 @@ public class ManagedPlanets implements java.io.Serializable {
         return null;
     }
 
-    private void noticePerformance(String performed_what) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Performed '" + performed_what + "': Summary.", "Performed '" + performed_what + "': Details."));
-    }
-
-    private void delay() {
-        try { Thread.sleep(1000); } catch(InterruptedException e) { e.printStackTrace(); }
+    public Object changeLocale() {
+        FacesContext.getCurrentInstance().getViewRoot().setLocale(this.currentLocale);
+        return null;
     }
 }

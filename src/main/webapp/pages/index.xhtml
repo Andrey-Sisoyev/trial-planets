@@ -8,145 +8,197 @@
 	xmlns:a4j="http://richfaces.org/a4j"
 	xmlns:rich="http://richfaces.org/rich">
 <ui:composition template="/templates/template.xhtml">
-
-	<ui:define name="title">#{msgs.applicationName}</ui:define>
+    <ui:define name="title">#{appMsgs['applicationName']}</ui:define>
 	<ui:define name="body">
-        <rich:panel id="upper_status" style="border:0;width:600px;text-align:center" rendered="true">
-            <h:graphicImage url="resource:///resources/smil.gif"/><h:inputText id="page_reload_test" style="width:150px;"/>
-            <script type="text/javascript">document.getElementById('page_reload_test').value = 'Page reload tester (' + Math.floor(Math.random() * 10000) + ')';</script>
-        </rich:panel>
-        <rich:panel style="border:0;width:600px;text-align:center">
+
+        <a4j:loadBundle basename="planets.messages" var="plMsgs"/>
+
+        <a4j:queue id="locale_changer_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+
+        <h:form>
+            <h:selectOneMenu value="#{managedPlanets.currentLocale}" >
+                <f:selectItems value="#{managedPlanets.applicationResourceBundle.supportedLocales}"/>
+                <a4j:support reRender="planetsTable_window,CRUD_window,messages_window"
+                             action="#{managedPlanets.changeLocale()}"
+                             event="onchange" eventsQueue="locale_changer_queue"/>
+            </h:selectOneMenu><i>(пока не работает)</i>
+        </h:form>
+
+        <a4j:queue id="table_queue" size="1" sizeExceededBehavior="dropNew" requestDelay="500"/>
+
+        <a4j:region>
+              <h:form>
+                  <a4j:poll id="poll" interval="10000"
+                            action="#{managedPlanets.reloadTable()}"
+                            reRender="planetsTable,planetsTable_reload_info"
+                            eventsQueue="table_queue"/>
+              </h:form>
+        </a4j:region>
+
+        <rich:panel id="planetsTable_window" style="border:0;width:600px;text-align:center">
             <f:facet name="header">
-                <h:outputText value="Planets list" />
+                <h:outputText value="#{plMsgs['planet.list']}" />
             </f:facet>
 
-            <a4j:outputPanel id="frm_planetsTable">
-                <h:form id="frm_planetsTable_">
+            <a4j:outputPanel>
+
+                <rich:panel id="planetsTable_reload_info" style="border:0">
+                    <h:form>
+
+                        <h:graphicImage url="resource:///resources/smil.gif"/>
+                        <h:commandButton value="Reload table">
+                            <a4j:support reRender="planetsTable,planetCommandStatus,planetsTable_reload_info"
+                                         action="#{managedPlanets.reloadTable()}"
+                                         event="onclick" disableDefault="true" eventsQueue="table_queue"/>
+                        </h:commandButton>
+                        Snapshot time: #{managedPlanets.snapshotTime}
+                    </h:form>
+                </rich:panel>
+                <h:form>
                     <rich:extendedDataTable
                             id="planetsTable"
                             value="#{managedPlanets.planetsDataModel}"
                             var="planet" rowKeyVar="rkvar"
-                            width="550px" height="300px"
+                            width="550px" height="200px"
                             selectedClass="dataTableSelectedRow" sortMode="single" selectionMode="single"
                             selection="#{managedPlanets.selection}"
                             rendered="#{not empty managedPlanets.planetsList}"
                             tableState="#{managedPlanets.tableState}"
                             >
-                        <a4j:support reRender="planetCommandStatus,CRUD_window"
+                        <a4j:support reRender="planetCommandStatus,CRUD_window,planetsTable_reload_info"
                             action="#{managedPlanets.takeSelection()}"
                             event="onselectionchange" eventsQueue="CRUD_op_queue" status="crud_status"/>
+
                         <rich:column headerClass="dataTableHeader" width="150" label="Name" sortable="true"
                                      sortBy="#{planet.name}" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon"
                                      filterBy="#{planet.name}" filterEvent="onkeyup">
                             <f:facet name="header">
-                                <h:outputText value="Name" />
+                                <h:outputText value="#{plMsgs['planet.name']}"/>
                             </f:facet>
                             <h:outputText value="#{planet.name}" />
                         </rich:column>
+
                         <rich:column width="100" headerClass="dataTableHeader" label="Diameter" sortable="true"
-                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                                     sortBy="#{planet.diameter}" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
                              <f:facet name="header">
-                                <h:outputText value="Diameter" />
+                                <h:outputText value="#{plMsgs['planet.diameter']}" />
                              </f:facet>
                              <h:outputText value="#{planet.diameter}" />
                         </rich:column>
+                         <!-- todo: word-wrap -->
                         <rich:column width="100" headerClass="dataTableHeader" label="Distance to Earth"
-                                     sortable="true" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
-                             <f:facet name="header">
-                                <h:outputText value="Distance to Earth" />
-                             </f:facet>
-                             <h:outputText value="#{planet.distToEarth}">
-                             </h:outputText>
+                                     sortBy="#{planet.distToEarth}" sortable="true" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                            <f:facet name="header">
+                                <h:outputText value="#{plMsgs['planet.distanceToEarth']}" />
+                            </f:facet>
+                             <h:outputText value="#{planet.distToEarth}"/>
                         </rich:column>
+
                         <rich:column width="100" headerClass="dataTableHeader" label="Discoverer name" sortable="true"
-                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                                     sortBy="#{planet.discovererName}" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
                              <f:facet name="header">
-                                <h:outputText value="Discoverer name" />
+                                <h:outputText value="#{plMsgs['planet.discovererName']}" />
                              </f:facet>
                              <h:outputText value="#{planet.discovererName}" />
                         </rich:column>
+
                         <rich:column width="100" headerClass="dataTableHeader" label="Has atmosphere" sortable="true"
-                                     sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
+                                     sortBy="#{planet.atmosphere}" sortIconAscending="dataTableAscIcon" sortIconDescending="dataTableDescIcon">
                              <f:facet name="header">
-                                <h:outputText value="Has atmosphere" />
+                                <h:outputText value="#{plMsgs['planet.atmosphere']}" />
                              </f:facet>
                              <h:selectBooleanCheckbox value="#{planet.atmosphere}" disabled="true"/>
                         </rich:column>
                     </rich:extendedDataTable>
                 </h:form>
+
                 <h:outputText value="No entries in the table." rendered="#{empty managedPlanets.planetsList}"/>
-                <a4j:queue id="table_queue" size="1" sizeExceededBehavior="dropNew"/>
             </a4j:outputPanel>
         </rich:panel>
 
-        <a4j:queue id="CRUD_op_queue" size="1" sizeExceededBehavior="fireNew"/>
-
-        <rich:panel style="border:0;width:600px">
-            <h:form>
-                <h:commandButton value="Reload table">
-                    <a4j:support reRender="frm_planetsTable,planetCommandStatus"
-                                 action="#{managedPlanets.reloadTable()}"
-                                 event="onclick" disableDefault="true" eventsQueue="table_queue"/>
-                </h:commandButton>
-                <h:commandButton value="Prepare to Create">
-                    <a4j:support reRender="CRUD_window,planetCommandStatus"
-                                 action="#{managedPlanets.prepareCreate()}"
-                                 event="onclick" disableDefault="true" eventsQueue="CRUD_op_queue"
-                                 status="crud_status"/>
-                </h:commandButton>
-            </h:form>
-        </rich:panel>
+        <a4j:queue id="CRUD_op_queue" size="1" sizeExceededBehavior="fireNew" requestDelay="500"/>
 
         <a4j:outputPanel id="CRUD_window" >
-            <a4j:region id="reg_CRUD_window" >
+            <rich:panel style="border:0;width:600px">
+                <h:form>
+                    <h:commandButton value="#{managedPlanets.applicationResourceBundle.getPrepareOperation('CREATE')}">
+                        <a4j:support reRender="CRUD_window,planetCommandStatus"
+                                     action="#{managedPlanets.prepareCreate()}"
+                                     event="onclick" disableDefault="true" eventsQueue="CRUD_op_queue"
+                                     status="crud_status"/>
+                    </h:commandButton>
+                </h:form>
+            </rich:panel>
+            <a4j:region>
                 <rich:panel rendered="#{managedPlanets.planetCommand.doingOperation}"
                             style="border:0;width:600px">
                     <f:facet name="header">
-                        Planet CRUD form
+                        #{plMsgs['planet']} #{appMsgs['operation.crud.form']}
                         { OPERATION: #{managedPlanets.planetCommand.operation.string}
                         ; READ-ONLY: #{managedPlanets.planetCommand.operation.areFieldsReadOnly}
                         }
                     </f:facet>
                     <h:panelGroup id="wizardInclude">
                         <a4j:form id="CRUD_form" eventsQueue="CRUD_op_queue">
-                            <h:outputLabel for="pl_id" value="Planet ID: "  />
-                            <h:inputText  id="pl_id" readonly="true" validatorMessage="Invalid planet ID!"
-                                          value="#{managedPlanets.planetCommand.selectedPlanet.plID}"
-                                          style="width:50px"/>
+                            <table border="0">
+                                <tr>
+                                    <td><h:outputLabel for="pl_id" value="#{plMsgs['planet.id']}: "  /></td>
+                                    <td><h:inputText
+                                            id="pl_id" readonly="true" validatorMessage="Invalid planet ID!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.plID}"
+                                            style="width:50px"/></td>
+                                    <td><h:message for="pl_id" errorClass="errorMsg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputLabel for="name" value="#{plMsgs['planet.name']}: "  /></td>
+                                    <td><h:inputText
+                                            id="name" validatorMessage="Invalid planet name!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.name}"
+                                            readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                            style="width:100px"/></td>
+                                    <td><h:message for="name" errorClass="errorMsg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputLabel for="distToEarth" value="#{plMsgs['planet.distanceToEarth']}: "  /></td>
+                                    <td><h:inputText
+                                            id="distToEarth" validatorMessage="Invalid distance to Earth!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.distToEarth}"
+                                            readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                            style="width:50px"/></td>
+                                    <td><h:message for="distToEarth" errorClass="errorMsg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputLabel for="diameter" value="#{plMsgs['planet.diameter']}: "  /></td>
+                                    <td><h:inputText
+                                            id="diameter" validatorMessage="Invalid planet diameter!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.diameter}"
+                                            readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                            style="width:50px"/></td>
+                                    <td><h:message for="diameter" errorClass="errorMsg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputLabel for="discoverer" value="#{plMsgs['planet.discovererName']}: "  /></td>
+                                    <td><h:inputText
+                                            id="discoverer" validatorMessage="Invalid discoverer name!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.discovererName}"
+                                            readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                            style="width:100px" /></td>
+                                    <td><h:message for="discoverer" errorClass="errorMsg"/></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputLabel for="atmosphere" value="#{plMsgs['planet.atmosphere']}: "  /></td>
+                                    <td><h:selectBooleanCheckbox
+                                            id="atmosphere" validatorMessage="Invalid data about atmosphere!"
+                                            value="#{managedPlanets.planetCommand.selectedPlanet.atmosphere}"
+                                            readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/></td>
+                                    <td><h:message for="atmosphere" errorClass="errorMsg"/></td>
+                                </tr>
+                            </table>
 
-                            <h:outputLabel for="name" value="Planet name: "  />
-                            <h:inputText id="name" validatorMessage="Invalid planet name!"
-                                         value="#{managedPlanets.planetCommand.selectedPlanet.name}"
-                                         readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                         style="width:100px"/>
-
-                            <h:outputLabel for="distToEarth" value="Distance to Earth: "  />
-                            <h:inputText id="distToEarth" validatorMessage="Invalid distance to Earth!"
-                                         value="#{managedPlanets.planetCommand.selectedPlanet.distToEarth}"
-                                         readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                         style="width:50px"/>
-                            <br/>
-                            <h:outputLabel for="diameter" value="Planet diameter: "  />
-                            <h:inputText id="diameter" validatorMessage="Invalid planet diameter!"
-                                         value="#{managedPlanets.planetCommand.selectedPlanet.diameter}"
-                                         readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                         style="width:50px"/>
-
-                            <h:outputLabel for="discoverer" value="Discoverer name: "  />
-                            <h:inputText id="discoverer" validatorMessage="Invalid discoverer name!"
-                                         value="#{managedPlanets.planetCommand.selectedPlanet.discovererName}"
-                                         readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                         style="width:100px" />
-
-                            <h:outputLabel for="atmosphere" value="Has atmosphere: "  />
-                            <h:selectBooleanCheckbox id="atmosphere" validatorMessage="Invalid data about atmosphere!"
-                                                     value="#{managedPlanets.planetCommand.selectedPlanet.atmosphere}"
-                                                     readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
-                            <br/>
                             <h:panelGroup rendered="#{not managedPlanets.planetCommand.operation.read}" style="border:0">
                                 <a4j:commandButton value="#{managedPlanets.planetCommand.operation}"
                                                    action="#{managedPlanets.doCRUD()}"
-                                                   reRender="CRUD_window,planetsTable,planetCommandStatus"
+                                                   reRender="CRUD_window,planetsTable,planetCommandStatus,planetsTable_reload_info"
                                                    status="crud_status"/>
                                 <a4j:commandButton value="Cancel"
                                                    action="#{managedPlanets.cancelAction()}"
@@ -155,18 +207,17 @@
                             </h:panelGroup>
                             <h:panelGroup style="border:0;padding:0;margin:0">
                                 <h:panelGroup rendered="#{managedPlanets.planetCommand.operation.read}" style="border:0">
-                                    <a4j:commandButton value="Prepare to Update"
+                                    <a4j:commandButton value="#{managedPlanets.applicationResourceBundle.getPrepareOperation('UPDATE')}"
                                                        action="#{managedPlanets.prepareUpdate()}"
-                                                       reRender="CRUD_window,planetCommandStatus"
+                                                       reRender="CRUD_window,planetCommandStatus,planetsTable,planetsTable_reload_info"
                                                        status="crud_status"/>
-                                    <a4j:commandButton value="Prepare to Delete"
+                                    <a4j:commandButton value="#{managedPlanets.applicationResourceBundle.getPrepareOperation('DELETE')}"
                                                        action="#{managedPlanets.prepareDelete()}"
-                                                       reRender="CRUD_window,planetCommandStatus"
+                                                       reRender="CRUD_window,planetCommandStatus,planetsTable,planetsTable_reload_info"
                                                        status="crud_status"/>
                                 </h:panelGroup>
                             </h:panelGroup>
                         </a4j:form>
-                        <rich:messages minLevel="WARN" for="CRUD_form" errorClass="errorMsg" infoClass="infoMsg"/>
                     </h:panelGroup>
                 </rich:panel>
                 <a4j:status id="crud_status" layout="block" stopStyle="display: none;">
@@ -177,9 +228,10 @@
             </a4j:region>
         </a4j:outputPanel>
 
-        <rich:messages globalOnly="true" level="ALL" layout="table" showDetail="false" showSummary="true" errorClass="errorMsg" infoClass="infoMsg"/>
+        <rich:messages id="messages_window" globalOnly="true" level="ALL" layout="table" showDetail="false" showSummary="true" errorClass="errorMsg" infoClass="infoMsg"/>
 
         <rich:panel id="planetCommandStatus" style="border:0;width:60%;text-align:center" rendered="false">
+            локаль: #{facesContext.viewRoot.locale} <br/>
             read: #{not managedPlanets.planetCommand.operation.read} <br/>
             planetCommand : #{managedPlanets.planetCommand}<br/>
             planetCommand.doingOperation : #{managedPlanets.planetCommand.doingOperation}<br/>

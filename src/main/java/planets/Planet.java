@@ -15,8 +15,8 @@ public class Planet implements java.io.Serializable, CloneableFixed {
         return planetsIDs_seq;
     }
     static {
-        planetsDB.put(1, new Planet(1, "Земля", 0.0, "{ неприменимо }", 10.0, true));
-        planetsDB.put(2, new Planet(2, "Юпитер", 10.0, "{ неизвестно }", 500.0, true));
+        planetsDB.put(1, new Planet(1, "Earth", 0.0, "n/a", 10.0, true));
+        planetsDB.put(2, new Planet(2, "Jupiter", 10.0, "{ unknown }", 500.0, true));
     }
 
     private Integer plID;

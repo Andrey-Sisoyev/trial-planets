@@ -23,4 +23,8 @@ public enum CRUD_Op {
     public String getString() { // workaround for JSF EL 2.0
         return this.toString();
     }
+
+    public String getMsgPropertyName() { // workaround for JSF EL 2.0
+        return "operation.crud." + this.toString();
+    }
 }

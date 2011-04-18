@@ -10,15 +10,14 @@
 
     <application>
 		<view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
-		<locale-config>
-			<default-locale>en</default-locale>
-			<supported-locale>en</supported-locale>
-		</locale-config>
-		<message-bundle>planets.messages</message-bundle>
+
+        <message-bundle>planets.messages</message-bundle>
+        <message-bundle>app.messages</message-bundle>
 
         <locale-config>
             <default-locale>en</default-locale>
             <supported-locale>ru</supported-locale>
+            <supported-locale>en</supported-locale>
         </locale-config>
 	</application>
 </faces-config>

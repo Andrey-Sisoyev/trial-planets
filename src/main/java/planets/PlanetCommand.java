@@ -1,6 +1,8 @@
 package planets;
 
 import home.lang.CRUD_Op;
+import home.lang.EntityExistsException;
+import home.lang.EntityExistsNotException;
 
 public class PlanetCommand {
     // ===========================
@@ -68,7 +70,7 @@ public class PlanetCommand {
         operation = CRUD_Op.DELETE;
     }
 
-    public void doCRUD() {
+    public void doCRUD() throws EntityExistsNotException, EntityExistsException {
         assert doingOperation;
 
         // critical section!
@@ -79,21 +81,42 @@ public class PlanetCommand {
             case CREATE:
                 Integer id = Planet.planetsIDs_seq_next();
                 snapshot.setPlID(id);
-                Planet.planetsDB.put(id, snapshot);
+                if(!Planet.planetsDB.containsKey(snapshot.getPlID()))
+                     Planet.planetsDB.put(id, snapshot);
+                else throw new EntityExistsException();
                 Planet cur_sel = selectedPlanet;
                 if(cur_sel != null) cur_sel.setPlID(id); // critical section! // guarded by synchronized (planetCommand) in ManagedBean
+                this.cancelAction();
                 break;
-            case READ: break;
+            case READ:
+                if(!Planet.planetsDB.containsKey(snapshot.getPlID())) {
+                    this.cancelAction();
+                    throw new EntityExistsNotException();
+                }
+                break;
             case UPDATE:
                 assert snapshot != null;
-                Planet.planetsDB.replace(snapshot.getPlID(), snapshot);
+                if(Planet.planetsDB.containsKey(snapshot.getPlID())) {
+                    Planet.planetsDB.replace(snapshot.getPlID(), snapshot);
+                    this.cancelAction();
+                } else {
+                    operation = CRUD_Op.CREATE;
+                    doingOperation = true;
+                    selectedPlanet.setPlID(null);
+                    throw new EntityExistsNotException();
+                }
                 break;
             case DELETE:
                 assert snapshot != null;
-                Planet.planetsDB.remove(snapshot.getPlID());
+                doingOperation = false;
+                selectedPlanet = null;
+                operation = CRUD_Op.READ;
+                if(Planet.planetsDB.containsKey(snapshot.getPlID()))
+                     Planet.planetsDB.remove(snapshot.getPlID());
+                else throw new EntityExistsNotException();
+
                 break;
         }
-        this.cancelAction();
     }
 
     public void cancelAction() {
