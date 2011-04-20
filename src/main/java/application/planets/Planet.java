@@ -1,12 +1,16 @@
-package planets;
+package application.planets;
 
+import application.planets.validator.EarthHasAtmosphere;
 import home.lang.CloneableFixed;
 import home.lang.RTCloneNotSupported;
+import home.lang.validator.Cmp;
 
-import java.util.List;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@EarthHasAtmosphere
 public class Planet implements java.io.Serializable, CloneableFixed {
     public static final ConcurrentMap<Integer, Planet> planetsDB = new ConcurrentHashMap<Integer, Planet>();
     public static volatile Integer planetsIDs_seq = 2;
@@ -18,14 +22,28 @@ public class Planet implements java.io.Serializable, CloneableFixed {
         planetsDB.put(1, new Planet(1, "Earth", 0.0, "n/a", 10.0, true));
         planetsDB.put(2, new Planet(2, "Jupiter", 10.0, "{ unknown }", 500.0, true));
     }
+    // ===========================
+    // VALIDATORS-GROUPS
+    public interface Persistent {}
 
+    // ===========================
+    // NON-STATIC STUFF
+    @NotNull(message = "{planet.plID.notNull}", groups = { Persistent.class })
     private Integer plID;
+    @NotNull
     private String name;
+    @NotNull(message = "{planet.distToEarth.notNull}")
     private Double distToEarth;
+    @NotNull(message = "{planet.discovererName.notNull}")
     private String discovererName;
+    @NotNull(message = "{planet.diameter.notNull}")
+    @Cmp(value = 0, prop_rel_cnstr = Cmp.REL.GT)
     private Double diameter;
+    @NotNull(message = "{planet.name.notNull}")
     private boolean atmosphere;
 
+    // ===========================
+    // CONSTRUCTORS
     public Planet() {
         plID = null;
         name = "{unspecified}";
@@ -44,6 +62,8 @@ public class Planet implements java.io.Serializable, CloneableFixed {
         atmosphere = _atmosphere;
     }
 
+    // ===========================
+    // GETTERS/SETTERS
     public Integer getPlID() {
         return plID;
     }
@@ -92,6 +112,11 @@ public class Planet implements java.io.Serializable, CloneableFixed {
         atmosphere = _atmosphere;
     }
 
+    // ================================
+    // METHODS
+
+    // ================================
+    // LOW-LEVEL OVERRIDES
     @Override
     public Planet clone() {
         try { return (Planet) super.clone(); } catch (CloneNotSupportedException e) { throw new RTCloneNotSupported(e); }

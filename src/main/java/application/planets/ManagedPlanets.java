@@ -1,8 +1,10 @@
-package planets;
+package application.planets;
 
+import application.resbundle.AppResBundle;
 import home.lang.CRUD_Op;
 import home.lang.EntityExistsException;
 import home.lang.EntityExistsNotException;
+import org.richfaces.component.UIGraphValidator;
 import org.richfaces.model.DataProvider;
 import org.richfaces.model.ExtendedTableDataModel;
 import org.richfaces.model.selection.SimpleSelection;
@@ -10,6 +12,7 @@ import org.richfaces.model.selection.SimpleSelection;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.validation.Valid;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -21,11 +24,13 @@ public class ManagedPlanets implements java.io.Serializable {
     // ====================================
     // NON-STATIC STUFF
     private volatile String currentLocaleStr = FacesContext.getCurrentInstance().getViewRoot().getLocale().toString();
+    @Valid
     private final PlanetCommand planetCommand;
     private volatile SimpleSelection selection; // final n/a
     private Date snapshotTime;
     private volatile Object tableState; // todo: remove???
     private final ExtendedTableDataModel<Planet> tableDataModel;
+    private UIGraphValidator planetCommandValidator;
 
     // ====================================
     // CONSTRUCTORS
@@ -98,11 +103,19 @@ public class ManagedPlanets implements java.io.Serializable {
     }
 
     public String getSnapshotTime() {
-        return ApplicationResourceBundle.getDatetimeStr(snapshotTime);
+        return AppResBundle.getDatetimeStr(snapshotTime);
     }
 
-    public ApplicationResourceBundle getApplicationResourceBundle() {
-        return ApplicationResourceBundle.getInstance();
+    public AppResBundle getApplicationResourceBundle() {
+        return AppResBundle.getInstance();
+    }
+
+    public UIGraphValidator getPlanetCommandValidator() {
+        return planetCommandValidator;
+    }
+
+    public void setPlanetCommandValidator(UIGraphValidator _planetCommandValidator) {
+        planetCommandValidator = _planetCommandValidator;
     }
 
     // ====================================
@@ -240,6 +253,7 @@ public class ManagedPlanets implements java.io.Serializable {
         delay();
 
         CRUD_Op operation_log;
+        Planet planet_log;
         Integer planet_id_log;
         Exception failure_cause = null;
 
@@ -248,9 +262,14 @@ public class ManagedPlanets implements java.io.Serializable {
             // operation of the command have no setter, and may be changed only through action
             // all actions are assummed to be thread-safe
             operation_log = planetCommand.getOperation();
-            planet_id_log = planetCommand.getSelectedPlanet().getPlID(); // getSelectedPlanet != null
+            planet_log    = planetCommand.getSelectedPlanet();
+            planet_id_log = planet_log == null ? null : planetCommand.getSelectedPlanet().getPlID(); // getSelectedPlanet != null
 
-            try { planetCommand.doCRUD(); }
+            try {
+                if(planetCommand.getSelectedPlanet() == null)
+                    throw new EntityExistsNotException();
+                planetCommand.doCRUD();
+            }
             catch (EntityExistsNotException e) { failure_cause = e; }
             catch (EntityExistsException    e) { failure_cause = e; }
 

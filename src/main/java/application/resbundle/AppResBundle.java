@@ -1,37 +1,45 @@
-package planets;
+package application.resbundle;
 
 import home.lang.CRUD_Op;
 import home.lang.HomeUtils;
+import application.planets.ManagedPlanets;
 
+import javax.faces.application.Application;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.SystemEvent;
+import javax.faces.event.SystemEventListener;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class ApplicationResourceBundle {
+public class AppResBundle {
     private static final Logger logger = Logger.getLogger(ManagedPlanets.class.getSimpleName());
     private static final String FILE_ID = "app.messages";
-    private static final List<Locale> SUPPORTED_LOCALES = // todo: make sure loads after FacesContext (how???)
-            Collections.unmodifiableList(
-                    HomeUtils.it2list
-                            (FacesContext.getCurrentInstance().getApplication().getSupportedLocales()
-                                    , new LinkedList<Locale>()
-                            ));
-    private static final Map<Locale,ResourceBundle> APP_BUNDLES;
+    private static List<Locale> SUPPORTED_LOCALES;
+    private static Map<Locale,ResourceBundle> APP_BUNDLES;
 
-    static {
+    // ================================
+    // CONSTRUCTORS
+
+    protected static void init() {
+        SUPPORTED_LOCALES = Collections.unmodifiableList(
+                HomeUtils.it2list
+                (FacesContext.getCurrentInstance().getApplication().getSupportedLocales()
+                        , new LinkedList<Locale>()
+                )
+        );
+
         Map<Locale,ResourceBundle> map = new HashMap<Locale,ResourceBundle>();
         for(Locale loc : SUPPORTED_LOCALES)
             map.put(loc, ResourceBundle.getBundle(FILE_ID, loc));
         APP_BUNDLES = Collections.unmodifiableMap(map);
     }
 
-    // ================================
-    // CONSTRUCTORS
-    private static final ApplicationResourceBundle SINGLETON = new ApplicationResourceBundle();
-    public static ApplicationResourceBundle getInstance() { return SINGLETON; } // special for JSF
-    protected ApplicationResourceBundle() {}
+    private static final AppResBundle SINGLETON = new AppResBundle();
+    public static AppResBundle getInstance() { return SINGLETON; } // special for JSF
+    protected AppResBundle() {}
 
     // ================================
     // GETTERS/SETTERS
@@ -63,6 +71,4 @@ public class ApplicationResourceBundle {
 
     // ================================
     // LOW-LEVEL OVERRIDES
-
-
 }

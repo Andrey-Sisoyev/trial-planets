@@ -1,15 +1,22 @@
-package planets;
+package application.planets;
 
 import home.lang.CRUD_Op;
 import home.lang.EntityExistsException;
 import home.lang.EntityExistsNotException;
 
+import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
+
 public class PlanetCommand {
     // ===========================
     // NON-STATIC STUFF
+    @Valid
     private volatile Planet selectedPlanet;
     private volatile CRUD_Op operation;
     private volatile Boolean doingOperation;
+
+    // ===========================
+    // VALIDATORS-GROUPS
 
     // ===========================
     // CONSTRUCTORS

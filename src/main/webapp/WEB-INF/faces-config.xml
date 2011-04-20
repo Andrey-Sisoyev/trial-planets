@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
     <managed-bean>
         <managed-bean-name>managedPlanets</managed-bean-name>
-        <managed-bean-class>planets.ManagedPlanets</managed-bean-class>
+        <managed-bean-class>application.planets.ManagedPlanets</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope> <!-- todo: conversation??? -->
     </managed-bean>
 
@@ -13,11 +13,22 @@
 
         <message-bundle>planets.messages</message-bundle>
         <message-bundle>app.messages</message-bundle>
+        <message-bundle>ValidationMessages</message-bundle>
 
         <locale-config>
             <default-locale>en</default-locale>
             <supported-locale>ru</supported-locale>
             <supported-locale>en</supported-locale>
         </locale-config>
+
+        <system-event-listener>
+              <system-event-listener-class>
+                  application.resbundle.AppResBundle_FacesStartListener
+              </system-event-listener-class>
+              <system-event-class>
+                  javax.faces.event.PostConstructApplicationEvent
+              </system-event-class>
+        </system-event-listener>
+
 	</application>
 </faces-config>

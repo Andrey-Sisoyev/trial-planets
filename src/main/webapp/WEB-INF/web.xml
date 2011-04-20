@@ -2,7 +2,7 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-	<display-name>Tic Tac Toe</display-name>
+
 	<context-param>
 		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
 		<param-value>server</param-value>
@@ -39,6 +39,10 @@
           <param-name>com.sun.faces.injectionProvider</param-name>
           <param-value>org.jboss.web.jsf.integration.injection.JBossInjectionProvider</param-value>
      </context-param>
+    <context-param>
+        <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
+        <param-value>true</param-value>
+    </context-param>
 
 	<filter>
 		<display-name>RichFaces Filter</display-name>
