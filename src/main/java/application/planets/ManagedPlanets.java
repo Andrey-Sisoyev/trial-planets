@@ -199,10 +199,15 @@ public class ManagedPlanets implements java.io.Serializable {
         logger.info("before takeSelection (" + this + ")");
         delay();
 
+        boolean op_done = false;
         synchronized (planetCommand) {
-            Integer key = (Integer) selection.getKeys().next();
-            planetCommand.takeSelection(tableDataModel.getObjectByKey(key));
+            if(selection != null && selection.getKeys().hasNext()) {
+                Integer key = (Integer) selection.getKeys().next();
+                planetCommand.takeSelection(tableDataModel.getObjectByKey(key).clone());
+                op_done = true;
+            }
         }
+        if(!op_done) cancelAction();
 
         logger.info("after takeSelection (" + this + ")");
         noticePerformance("takeSelection");
@@ -290,9 +295,12 @@ public class ManagedPlanets implements java.io.Serializable {
         logger.info("before cancelAction (" + this + ")");
         delay();
 
-        synchronized (planetCommand) {
-            planetCommand.cancelAction();
-        }
+        if(selection != null && selection.getKeys().hasNext())
+            this.takeSelection();
+        else
+            synchronized (planetCommand) {
+                planetCommand.doingNothing();
+            }
 
         logger.info("after cancelAction (" + this + ")");
         noticePerformance("cancelAction");

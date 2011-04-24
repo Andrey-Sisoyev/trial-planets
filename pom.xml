@@ -135,6 +135,7 @@
                 <executions>
                     <execution>
                         <phase>generate-resources</phase>
+                        <!-- phase>generate-resources</phase -->
                         <goals>
                             <goal>native2ascii</goal>
                         </goals>
@@ -174,17 +175,6 @@
 
 
 	</build>
-
-	<repositories>
-		<repository>
-			<id>jboss</id>
-			<url>http://repository.jboss.org/maven2</url>
-		</repository>
-        <repository>
-            <id>java.net</id>
-            <url>http://download.java.net/maven/2</url>
-        </repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -235,14 +225,26 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>4.0.0.GA</version>
-            <scope>compile</scope>
+            <version>4.1.0.Final</version>
         </dependency>
-        <!-- dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.0.0.GA</version>
-        </dependency -->
+        </dependency>
+        <dependency>
+            <groupId>home.lang.jsr303mod</groupId>
+            <artifactId>adv-msg-interpolator</artifactId>
+            <version>1.0.Stable</version>
+            <!-- download it from here: https://github.com/Andrey-Sisoyev/adv-msg-interpolator -->
+            <!-- and run "mvn install" on it -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>hibernate-validator</artifactId>
+                    <groupId>org.hibernate</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <dependency>
 			<groupId>org.testng</groupId>
@@ -263,4 +265,20 @@
 
 
 	</dependencies>
+
+    <repositories>
+		<repository>
+			<id>jboss</id>
+			<url>http://repository.jboss.org/maven2</url>
+		</repository>
+        <repository>
+            <id>java.net</id>
+            <url>http://download.java.net/maven/2</url>
+        </repository>
+        <repository>
+            <id>JBoss-Maven-Repository</id>
+            <name>JBoss Maven Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+	</repositories>
 </project>

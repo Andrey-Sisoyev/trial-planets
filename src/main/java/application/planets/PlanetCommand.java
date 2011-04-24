@@ -5,7 +5,6 @@ import home.lang.EntityExistsException;
 import home.lang.EntityExistsNotException;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertTrue;
 
 public class PlanetCommand {
     // ===========================
@@ -93,11 +92,11 @@ public class PlanetCommand {
                 else throw new EntityExistsException();
                 Planet cur_sel = selectedPlanet;
                 if(cur_sel != null) cur_sel.setPlID(id); // critical section! // guarded by synchronized (planetCommand) in ManagedBean
-                this.cancelAction();
+                this.backToRead();
                 break;
             case READ:
                 if(!Planet.planetsDB.containsKey(snapshot.getPlID())) {
-                    this.cancelAction();
+                    this.backToRead();
                     throw new EntityExistsNotException();
                 }
                 break;
@@ -105,7 +104,7 @@ public class PlanetCommand {
                 assert snapshot != null;
                 if(Planet.planetsDB.containsKey(snapshot.getPlID())) {
                     Planet.planetsDB.replace(snapshot.getPlID(), snapshot);
-                    this.cancelAction();
+                    this.backToRead();
                 } else {
                     operation = CRUD_Op.CREATE;
                     doingOperation = true;
@@ -115,9 +114,7 @@ public class PlanetCommand {
                 break;
             case DELETE:
                 assert snapshot != null;
-                doingOperation = false;
-                selectedPlanet = null;
-                operation = CRUD_Op.READ;
+                doingNothing();
                 if(Planet.planetsDB.containsKey(snapshot.getPlID()))
                      Planet.planetsDB.remove(snapshot.getPlID());
                 else throw new EntityExistsNotException();
@@ -126,8 +123,14 @@ public class PlanetCommand {
         }
     }
 
-    public void cancelAction() {
+    public void backToRead() {
         operation = CRUD_Op.READ;
         doingOperation = selectedPlanet != null;
+    }
+
+    public void doingNothing() {
+        operation = CRUD_Op.READ;
+        doingOperation = false;
+        selectedPlanet = null;
     }
 }

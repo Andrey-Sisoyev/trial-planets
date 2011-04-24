@@ -30,7 +30,7 @@
 
         <a4j:region>
               <h:form>
-                  <a4j:poll id="poll" interval="60000"
+                  <a4j:poll id="poll" interval="300000"
                             action="#{managedPlanets.reloadTable()}"
                             reRender="planetsTable,planetsTable_reload_info"
                             eventsQueue="table_queue" limitToList="true"/>
@@ -146,56 +146,89 @@
                                 <table border="0">
                                     <tr>
                                         <td><h:outputLabel for="pl_id" value="#{plMsgs['planet.id']}: "  /></td>
-                                        <td><h:inputText
-                                                id="pl_id" readonly="true" validatorMessage="Invalid planet ID!"
+                                        <td><h:outputText id="pl_id"
+                                                validatorMessage="Invalid planet ID!"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.plID}"
-                                                style="width:50px"/></td>
+                                                style="width:50px"/>
+                                        </td>
                                         <td><h:message for="pl_id" errorClass="errorMsg"/></td>
                                     </tr>
                                     <tr>
                                         <td><h:outputLabel for="name" value="#{plMsgs['planet.name']}: "  /></td>
                                         <td><h:inputText
-                                                id="name" validatorMessage="Invalid planet name!"
+                                                id="name"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.name}"
-                                                readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                                style="width:100px"/></td>
+                                                rendered="#{not managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:100px"/>
+                                            <ui:remove><!-- don't forget, that "readonly=true" makes it's value immutable from request to request despite changes in MB --></ui:remove>
+                                            <h:outputText
+                                                value="#{managedPlanets.planetCommand.selectedPlanet.name}"
+                                                rendered="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:100px"/>
+                                        </td>
                                         <td><h:message for="name" errorClass="errorMsg"/></td>
                                     </tr>
                                     <tr>
                                         <td><h:outputLabel for="distToEarth" value="#{plMsgs['planet.distanceToEarth']}: "  /></td>
                                         <td><h:inputText
-                                                id="distToEarth" validatorMessage="Invalid distance to Earth!"
+                                                id="distToEarth"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.distToEarth}"
-                                                readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                                style="width:50px" label="#{plMsgs['planet.distToEarth']}" converterMessage="#{valMsgs['home.lang.jsf_converter.message']}"/></td>
+                                                rendered="#{not managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:50px" label="#{plMsgs['planet.distToEarth']}"
+                                                converterMessage="#{valMsgs['home.lang.jsr303mod.jsf_converter.message']}"/>
+                                            <ui:remove><!-- don't forget, that "readonly=true" makes it's value immutable from request to request despite changes in MB --></ui:remove>
+                                            <h:outputText
+                                                value="#{managedPlanets.planetCommand.selectedPlanet.distToEarth}"
+                                                rendered="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:50px" label="#{plMsgs['planet.distToEarth']}"/>
+                                        </td>
                                         <td><h:message for="distToEarth" errorClass="errorMsg"/></td>
                                     </tr>
                                     <tr>
                                         <td><h:outputLabel for="diameter" value="#{plMsgs['planet.diameter']}: "/></td>
                                         <td><h:inputText
-                                                id="diameter" validatorMessage="Invalid planet diameter!"
+                                                id="diameter"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.diameter}"
-                                                readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                rendered="#{not managedPlanets.planetCommand.operation.areFieldsReadOnly}"
                                                 style="width:50px" label="#{plMsgs['planet.diameter']}"
-                                                converterMessage="111 #{valMsgs['home.lang.jsf_converter.message']}"/>
+                                                converterMessage="#{valMsgs['home.lang.jsr303mod.jsf_converter.message']}"/>
+                                            <ui:remove><!-- don't forget, that "readonly=true" makes it's value immutable from request to request despite changes in MB --></ui:remove>
+                                            <h:outputText
+                                                value="#{managedPlanets.planetCommand.selectedPlanet.diameter}"
+                                                rendered="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:50px" label="#{plMsgs['planet.diameter']}"/>
                                         </td>
                                         <td><h:message for="diameter" errorClass="errorMsg"/></td>
                                     </tr>
                                     <tr>
                                         <td><h:outputLabel for="discoverer" value="#{plMsgs['planet.discovererName']}: "  /></td>
                                         <td><h:inputText
-                                                id="discoverer" validatorMessage="Invalid discoverer name!"
+                                                id="discoverer"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.discovererName}"
-                                                readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
-                                                style="width:100px" /></td>
+                                                rendered="#{not managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:100px" />
+                                            <ui:remove><!-- don't forget, that "readonly=true" makes it's value immutable from request to request despite changes in MB --></ui:remove>
+                                            <h:outputText
+                                                value="#{managedPlanets.planetCommand.selectedPlanet.discovererName}"
+                                                rendered="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                style="width:100px" />
+                                        </td>
                                         <td><h:message for="discoverer" errorClass="errorMsg"/></td>
                                     </tr>
                                     <tr>
-                                        <td><h:outputLabel for="atmosphere" value="#{plMsgs['planet.atmosphere']}: "  /></td>
+                                        <td><h:outputLabel for="atmosphere" value="#{plMsgs['planet.atmosphere']}: "/></td>
                                         <td><h:selectBooleanCheckbox
                                                 id="atmosphere" validatorMessage="Invalid data about atmosphere!"
                                                 value="#{managedPlanets.planetCommand.selectedPlanet.atmosphere}"
-                                                readonly="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"/></td>
+                                                rendered="#{not managedPlanets.planetCommand.operation.areFieldsReadOnly}"/>
+                                            <ui:remove><!-- Mojarra 2.0.3 has a bug here (http://stackoverflow.com/questions/5771073/readonly-checkbox-in-jsf2-wont-update-from-server-side) --></ui:remove>
+                                            <ui:remove><!-- don't forget, that "readonly=true" makes it's value immutable from request to request despite changes in MB --></ui:remove>
+                                            <h:selectBooleanCheckbox
+                                                validatorMessage="Invalid data about atmosphere!"
+                                                value="${managedPlanets.planetCommand.selectedPlanet.atmosphere}"
+                                                rendered="#{managedPlanets.planetCommand.operation.areFieldsReadOnly}"
+                                                disabled="true"/>
+                                        </td>
                                         <td><h:message for="atmosphere" errorClass="errorMsg"/></td>
                                     </tr>
                                 </table>

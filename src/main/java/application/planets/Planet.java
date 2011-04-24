@@ -3,9 +3,8 @@ package application.planets;
 import application.planets.validator.EarthHasAtmosphere;
 import home.lang.CloneableFixed;
 import home.lang.RTCloneNotSupported;
-import home.lang.validator.Cmp;
+import home.lang.jsr303mod.validator.Cmp;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,6 +32,7 @@ public class Planet implements java.io.Serializable, CloneableFixed {
     @NotNull
     private String name;
     @NotNull(message = "{planet.distToEarth.notNull}")
+    @Cmp(value = 0, prop_rel_cnstr = Cmp.REL.GT_EQ)
     private Double distToEarth;
     @NotNull(message = "{planet.discovererName.notNull}")
     private String discovererName;

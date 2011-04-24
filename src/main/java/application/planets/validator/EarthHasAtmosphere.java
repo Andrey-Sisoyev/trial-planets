@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.values;
 @Target({ TYPE, METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 public @interface EarthHasAtmosphere {
-    String message() default "{planet.EarthHasAtmosphereValidator.message}";
+    String message() default "{${rb=planets.messages}planet.EarthHasAtmosphereValidator.message}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 
@@ -37,7 +37,7 @@ public @interface EarthHasAtmosphere {
         public void initialize(EarthHasAtmosphere constraintAnnotation) {}
 
         public boolean isValid(Planet _value, ConstraintValidatorContext context) {
-            logger.info("isValid");
+            // logger.info("isValid");
             if(_value == null) return true;
             Double dist = _value.getDistToEarth();
             if(dist == null) return true;

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="Sample_TestNG_Suite" verbose="4" parallel="classes">
-    <test name="test1">
+<suite name="Sample_TestNG_Suite" verbose="-1" parallel="classes">
+    <test name="test1" enabled="false">
         <packages>
             <package name="application.planets.validators"/>
         </packages>
     </test>
 
-    <test name="test2">
+    <test name="test2" enabled="true">
         <classes>
             <class name="application.planets.validator.PlanetValidationTest"/>
         </classes>
     </test>
+
 </suite>
